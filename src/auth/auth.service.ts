@@ -9,6 +9,7 @@ import { Role } from 'src/common/enums/role.enum';
 import { IAuthService } from './auth.interface';
 import { OAuth2Client } from 'google-auth-library';
 
+//service xử lý logic auth
 @Injectable()
 export class AuthService implements IAuthService {
     constructor(
@@ -34,7 +35,8 @@ export class AuthService implements IAuthService {
                 return {
                     success: false,
                     message: message,
-                    token: undefined
+                    accessToken: undefined,
+                    refreshToken: undefined
                 }
             }
             const hash = await bcrypt.hash(data.password, 10);
@@ -47,11 +49,13 @@ export class AuthService implements IAuthService {
                     phoneNumber: data.phoneNumber,
                 }
             })
-            const token = await this.signToken(user.id, user.email, user.username, user.role);
+            const { accessToken, refreshToken } = await this.signToken(user.id, user.email, user.username, user.role);
+            await this.updateRefreshToken(user.id, refreshToken);
             return {
                 success: true,
                 message: message,
-                token
+                accessToken,
+                refreshToken
             }
         }
         catch (ex) {
@@ -72,6 +76,8 @@ export class AuthService implements IAuthService {
                 return {
                     success: false,
                     message: message,
+                    accessToken: undefined,
+                    refreshToken: undefined
                 }
             }
             const isCorrectPassword = await bcrypt
@@ -82,21 +88,24 @@ export class AuthService implements IAuthService {
                 return {
                     success: false,
                     message: message,
-                    token: undefined
+                    accessToken: undefined,
+                    refreshToken: undefined
                 }
             }
-            const token = await this.signToken(existingUser.id, existingUser.email, existingUser.username, existingUser.role);
+            const {accessToken, refreshToken} = await this.signToken(existingUser.id, existingUser.email, existingUser.username, existingUser.role);
             return {
                 success: true,
                 message: message,
-                token
+                accessToken,
+                refreshToken
             }
         } catch (ex) {
             message = ex;
             return {
                 success: false,
                 message: message,
-                token: undefined
+                accessToken: undefined,
+                refreshToken: undefined
             }
         }
     }
@@ -108,7 +117,8 @@ export class AuthService implements IAuthService {
                 return {
                     success: false,
                     message: message,
-                    token: undefined
+                    accessToken: undefined,
+                    refreshToken: undefined
                 }
             }
             const userGG = await this.verifyGoogleToken(idToken);
@@ -117,7 +127,8 @@ export class AuthService implements IAuthService {
                 return {
                     success: false,
                     message: message,
-                    token: undefined
+                    accessToken: undefined,
+                    refreshToken: undefined
                 }
             }
             let existingUser = await this.prisma.user.findFirst({
@@ -139,21 +150,76 @@ export class AuthService implements IAuthService {
                     data: { googleId: userGG.googleId }
                 });
             }
-            const token = await this.signToken(existingUser.id, existingUser?.email, existingUser?.username, existingUser?.role);
+            const {accessToken, refreshToken} = await this.signToken(existingUser.id, existingUser?.email, existingUser?.username, existingUser?.role);
             return {
                 success: true,
                 message: message,
-                token
+                accessToken,
+                refreshToken
             }
         } catch (ex) {
             message = ex;
             return {
                 success: false,
                 message: message,
-                token: undefined
+                accessToken: undefined,
+                refreshToken: undefined
             }
         }
     }
+
+    async logout(userId: string): Promise<void> {
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: { hashedRefreshToken: null },
+        });
+    }
+
+    async refreshTokens(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+        try {
+            // 1️⃣ Xác thực refresh token
+            const payload = this.jwt.verify(refreshToken, {
+                secret: this.config.get<string>('JWT_REFRESH_SECRET'),
+            });
+
+            if (!payload || !payload.sub) {
+                throw new UnauthorizedException('Invalid refresh token');
+            }
+
+            // 2️⃣ Lấy user từ DB theo payload.sub
+            const user = await this.prisma.user.findUnique({
+                where: { id: payload.sub },
+            });
+
+            if (!user) {
+                throw new UnauthorizedException('User not found');
+            }
+
+            // 3️⃣ So sánh refresh token hash trong DB (nếu bạn lưu hash)
+            if (user.hashedRefreshToken) {
+                const isMatch = await bcrypt.compare(refreshToken, user.hashedRefreshToken);
+                if (!isMatch) throw new UnauthorizedException('Invalid refresh token');
+            }
+
+            // 4️⃣ Tạo accessToken và refreshToken mới
+            const { accessToken, refreshToken: newRefreshToken } = await this.signToken(
+                user.id,
+                user.email,
+                user.username,
+                user.role
+            );
+
+            // 5️⃣ Hash refresh token mới để lưu vào DB
+            await this.updateRefreshToken(user.id, newRefreshToken);
+
+            // 6️⃣ Trả 2 token mới cho resolver
+            return { accessToken, refreshToken: newRefreshToken };
+        } catch (err) {
+            console.error('Refresh token error:', err);
+            throw new UnauthorizedException('Refresh token expired or invalid');
+        }
+    }
+
     async verifyGoogleToken(idToken: string) {
         const clientId = this.config.get<string>('GOOGLE_CLIENT_ID');
         if (!clientId) {
@@ -172,15 +238,34 @@ export class AuthService implements IAuthService {
             email: payload['email']
         };
     }
-    async signToken(userId: string, email: string, userName: string, role: string) {
+    private async updateRefreshToken(userId: string, refreshToken: string) {
+        const hashRefreshToken = await bcrypt.hash(refreshToken, 10);
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: { hashedRefreshToken: hashRefreshToken },
+        });
+    }
+    private async signToken(userId: string, email: string, userName: string, role: string) {
         const payload = {
-            userId,
+            sub: userId,
             email,
             userName,
             role
         }
-        const secret = this.config.get('JWT_SECRET');
-        const token = await this.jwt.signAsync(payload);
-        return token;
+        const accessToken = await this.jwt.signAsync(payload, {
+            secret: this.config.get<string>('JWT_ACCESS_SECRET'),
+            expiresIn: '15m',
+        });
+        const refreshToken = await this.jwt.signAsync(
+            { sub: userId },
+            {
+                secret: this.config.get<string>('JWT_REFRESH_SECRET'),
+                expiresIn: '7d',
+            },
+        );
+        return {
+            accessToken,
+            refreshToken
+        }
     }
 }

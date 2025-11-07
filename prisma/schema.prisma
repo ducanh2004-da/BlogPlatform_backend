@@ -20,6 +20,7 @@ model User {
   googleId    String?  @unique
   phoneNumber String?
   address     String?
+  hashedRefreshToken  String?
   role        Role     @default(SUBSCRIBER)
   blogs       Blog[]
   avatar      String?
@@ -57,9 +58,9 @@ model Comment {
 
 model Tag {
   id         String   @id @default(uuid())
-  name       String?
-  blogId     String
-  blog       Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  name       String
+  blogId     String?
+  blog       Blog?     @relation(fields: [blogId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

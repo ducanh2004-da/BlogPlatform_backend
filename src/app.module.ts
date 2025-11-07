@@ -1,3 +1,4 @@
+// app.module.ts
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -27,13 +28,15 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
         'graphql-ws': true,
         'subscriptions-transport-ws': true,
       },
+      // <-- quan trọng: expose req và res vào context để resolver có ctx.req / ctx.res
+      context: ({ req, res }) => ({ req, res }),
     }),
-    BlogModule, 
-    TagModule, 
-    CommentModule, 
-    PrismaModule, 
-    AuthModule, 
-    UserModule
+    BlogModule,
+    TagModule,
+    CommentModule,
+    PrismaModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

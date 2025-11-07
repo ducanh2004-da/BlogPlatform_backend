@@ -12,7 +12,7 @@ export class UserResponse {
   email: string;
 
   @Field(() => String, { nullable: true }) 
-  phoneNumber?: string;
+  phoneNumber?: string | null;
 
   @Field(() => String, { nullable: true }) 
   avatar?: string | null;

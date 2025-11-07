@@ -9,5 +9,17 @@ export class AuthResponse{
     message?: string;
 
     @Field(() => String, {nullable: true})
-    token?: string;
+    accessToken?: string;
+
+    @Field(() => String, {nullable: true})
+    refreshToken?: string;
+}
+
+@ObjectType()
+export class GenericResponse {
+  @Field()
+  success: boolean;
+
+  @Field({ nullable: true })
+  message?: string;
 }
