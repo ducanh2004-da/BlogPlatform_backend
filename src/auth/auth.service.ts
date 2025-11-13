@@ -92,7 +92,7 @@ export class AuthService implements IAuthService {
                     refreshToken: undefined
                 }
             }
-            const {accessToken, refreshToken} = await this.signToken(existingUser.id, existingUser.email, existingUser.username, existingUser.role);
+            const { accessToken, refreshToken } = await this.signToken(existingUser.id, existingUser.email, existingUser.username, existingUser.role);
             return {
                 success: true,
                 message: message,
@@ -150,7 +150,7 @@ export class AuthService implements IAuthService {
                     data: { googleId: userGG.googleId }
                 });
             }
-            const {accessToken, refreshToken} = await this.signToken(existingUser.id, existingUser?.email, existingUser?.username, existingUser?.role);
+            const { accessToken, refreshToken } = await this.signToken(existingUser.id, existingUser?.email, existingUser?.username, existingUser?.role);
             return {
                 success: true,
                 message: message,
@@ -168,11 +168,19 @@ export class AuthService implements IAuthService {
         }
     }
 
-    async logout(userId: string): Promise<void> {
+    async logout(context): Promise<boolean> {
+        if (
+            !context ||
+            !context.res ||
+            typeof context.res.clearCookie !== 'function'
+        ) {
+            throw new UnauthorizedException('Logout failed: Invalid request context');
+        }
         await this.prisma.user.update({
-            where: { id: userId },
+            where: { id: context.user?.sub },
             data: { hashedRefreshToken: null },
         });
+        return true;
     }
 
     async refreshTokens(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {

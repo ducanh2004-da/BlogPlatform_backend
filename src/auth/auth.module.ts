@@ -40,6 +40,6 @@ import { OAuth2Client } from 'google-auth-library';
     AuthResolver,
     GoogleStrategy
   ],
-  exports: [AUTH_TOKEN]
+  exports: [AUTH_TOKEN, JwtModule]
 })
 export class AuthModule { }

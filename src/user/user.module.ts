@@ -6,10 +6,12 @@ import { IUserService, USER_TOKEN } from './user.interface';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { ConfigService } from '@nestjs/config';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   imports: [
     PrismaModule,
+    AuthModule,
     JwtModule.registerAsync({
           imports: [ConfigModule],
           useFactory: async (configService: ConfigService) => ({

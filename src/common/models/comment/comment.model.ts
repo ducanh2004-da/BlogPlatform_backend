@@ -27,10 +27,6 @@ export class CreateComment{
     @Field(() => String)
     @IsString({message: 'BlogId must be string'})
     blogId: string;
-
-    @Field(() => String)
-    @IsString({message: 'UserId must be string'})
-    userId: string;
 }
 
 @InputType()
@@ -43,8 +39,4 @@ export class UpdateComment{
     @Field(() => String)
     @IsString({message: 'BlogId must be string'})
     blogId: string;
-
-    @Field(() => String)
-    @IsString({message: 'UserId must be string'})
-    userId: string;
 }

@@ -77,8 +77,14 @@ export class AuthResolver {
     @Mutation(() => GenericResponse)
     @UseGuards(AuthGuard)
     async logout(@Context() ctx: any) {
-        await this.authService.logout(ctx.req.user.id);
-        this.clearAuthCookies(ctx.res);
+        const logoutResult = await this.authService.logout(ctx);
+        await this.clearAuthCookies(ctx.res);
+        if(!logoutResult){
+            return{
+                success: false,
+                message: 'Log out failed'
+            }
+        }
         return { success: true, message: 'Logged out' };
     }
 

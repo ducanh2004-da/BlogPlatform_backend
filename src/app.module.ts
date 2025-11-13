@@ -12,6 +12,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { LikeModule } from './like/like.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
     PrismaModule,
     AuthModule,
     UserModule,
+    LikeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

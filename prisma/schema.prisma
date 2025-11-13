@@ -25,6 +25,7 @@ model User {
   blogs       Blog[]
   avatar      String?
   comment     Comment[]
+  like        Like[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -37,6 +38,8 @@ model Blog {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   tags       Tag[]
   comments   Comment[]
+  likeCount  Int      @default(0)
+  like       Like[]
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -65,4 +68,16 @@ model Tag {
   updatedAt  DateTime @updatedAt
 
   @@index([blogId])
+}
+
+model Like {
+  id          String    @id @default(uuid())
+  userId      String    
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blogId      String
+  blog        Blog      @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, blogId])
+  @@index([userId, blogId])
 }

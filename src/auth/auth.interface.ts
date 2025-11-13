@@ -5,6 +5,6 @@ export interface IAuthService {
     login(data: LoginDto): Promise<AuthResponse>
     GoogleLogin(idToken: string): Promise<AuthResponse>
     refreshTokens(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }>
-    logout(userId: string): Promise<void>
+    logout(context): Promise<boolean>
 }
 export const AUTH_TOKEN = 'IAuthService';

@@ -59,6 +59,12 @@ type TagReponse {
   tags: [TagReturn!]
 }
 
+type CommentResponse {
+  success: Boolean!
+  message: String
+  comments: [CommentReturn!]
+}
+
 type AuthResponse {
   success: Boolean!
   message: String
@@ -71,15 +77,36 @@ type GenericResponse {
   message: String
 }
 
+type LikeReturn {
+  id: String!
+  blogId: String!
+  user: UserResponse!
+  createdAt: DateTime!
+}
+
+type LikeResponse {
+  success: Boolean!
+  message: String
+  count: Float!
+  likes: [LikeReturn!]
+}
+
+type CreateResponse {
+  success: Boolean!
+  message: String
+}
+
 type Query {
   getAllBlogs: BlogResponse!
   getBlogById(id: String!): BlogResponse!
   getAllTags: TagReponse!
   getTagById(id: String!): TagReponse!
+  getCommentByBlog(blogId: String!): CommentResponse!
   helloUser: String!
   helloAdmin: String!
   getUserById(userId: String!): UserReturn!
   currentUser: UserReturn!
+  getLikesByBlog(blogId: String!, skip: Int, take: Int): LikeResponse!
 }
 
 type Mutation {
@@ -89,11 +116,14 @@ type Mutation {
   createTag(data: CreateTag!): TagReponse!
   updateTag(id: String!, data: UpdateTag!): TagReponse!
   deleteTag(id: String!): TagReponse!
+  createComment(data: CreateComment!): CommentResponse!
   register(data: RegisterDto!): GenericResponse!
   login(data: LoginDto!): AuthResponse!
   refresh: GenericResponse!
   logout: GenericResponse!
   googleLogin(idToken: String!): AuthResponse!
+  createLike(blogId: String!): CreateResponse!
+  unLike(blogId: String!): CreateResponse!
 }
 
 input CreateBlog {
@@ -115,6 +145,11 @@ input CreateTag {
 
 input UpdateTag {
   name: String!
+}
+
+input CreateComment {
+  content: String!
+  blogId: String!
 }
 
 input RegisterDto {
