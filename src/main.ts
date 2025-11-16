@@ -12,7 +12,7 @@ async function bootstrap() {
   // Nếu chỉ dev: bạn có thể set origin: true
   // Nếu production: dùng danh sách whitelist (khuyến nghị)
   app.enableCors({
-    origin: ['http://localhost:5173'], // <- client origin (vite)
+    origin: ['http://localhost:5173','http://localhost:3000',], // <- client origin (vite)
     credentials: true,                  // RẤT QUAN TRỌNG: cho phép cookie
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Accept, Authorization, Cookie',

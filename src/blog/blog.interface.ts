@@ -6,5 +6,7 @@ export interface IBlogService {
     createBlog(data: CreateBlog): Promise<BlogResponse>
     updateBlog(blogId: string, data: UpdateBlog): Promise<BlogResponse>
     deleteBlog(id: string): Promise<BlogResponse>
+    getTop5Like(): Promise<BlogResponse>
+    getTop5Recent(): Promise<BlogResponse>
 }
 export const BLOG_TOKEN = 'IBlogService';

@@ -185,4 +185,80 @@ export class BlogService implements IBlogService {
             }
         }
     }
+
+    async getTop5Like(): Promise<BlogResponse>{
+        try{
+            const blog = await this.prisma.blog.findMany({
+                take: 5,
+                orderBy:[
+                    {likeCount: 'desc'},
+                    {createdAt: 'desc'}
+                ],
+                include:{
+                    user: true,
+                    tags: true,
+                    comments: {
+                        include: {
+                            user: true
+                        }
+                    }
+                }
+            });
+            if(!blog || blog.length === 0){
+                return{
+                    success: false,
+                    message: "Don't have any blog",
+                    blogs: []
+                }
+            }
+            return{
+                success: true,
+                message: "Blog retrieved successfully",
+                blogs: blog as BlogReturn[]
+            }
+        } catch (error) {
+            return {
+                success: false,
+                message: 'Error retrieving blogs',
+                blogs: []
+            }
+        }
+    }
+    async getTop5Recent(): Promise<BlogResponse>{
+        try{
+            const blog = await this.prisma.blog.findMany({
+                take: 5,
+                orderBy:[
+                    {createdAt: 'desc'}
+                ],
+                include:{
+                    user: true,
+                    tags: true,
+                    comments: {
+                        include: {
+                            user: true
+                        }
+                    }
+                }
+            });
+            if(!blog || blog.length === 0){
+                return{
+                    success: false,
+                    message: "Don't have any blog",
+                    blogs: []
+                }
+            }
+            return{
+                success: true,
+                message: "Blog retrieved successfully",
+                blogs: blog as BlogReturn[]
+            }
+        } catch (error) {
+            return {
+                success: false,
+                message: 'Error retrieving blogs',
+                blogs: []
+            }
+        }
+    }
 }

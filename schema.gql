@@ -99,6 +99,8 @@ type CreateResponse {
 type Query {
   getAllBlogs: BlogResponse!
   getBlogById(id: String!): BlogResponse!
+  getTop5Like: BlogResponse!
+  getTop5Recent: BlogResponse!
   getAllTags: TagReponse!
   getTagById(id: String!): TagReponse!
   getCommentByBlog(blogId: String!): CommentResponse!
