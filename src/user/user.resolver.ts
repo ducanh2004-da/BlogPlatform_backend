@@ -1,5 +1,5 @@
 import { Args, Query, Resolver, Mutation, Context } from '@nestjs/graphql';
-import { UserReturn } from 'src/common/models/user';
+import { UserReturn, UserResponse } from 'src/common/models/user';
 import { Inject, UseGuards} from '@nestjs/common';
 import { IUserService, USER_TOKEN } from './user.interface';
 import { AuthGuard } from 'src/common/guards/auth.guard';
@@ -12,6 +12,10 @@ export class UserResolver {
     @Query(() => UserReturn)
     async getUserById(@Args('userId') userId: string): Promise<UserReturn> {
         return this.userService.getUserById(userId);
+    }
+    @Query(() => [UserResponse])
+    async getAllUser(): Promise<UserResponse[]> {
+        return this.userService.getAllUser();
     }
 
     @Query(() => UserReturn)

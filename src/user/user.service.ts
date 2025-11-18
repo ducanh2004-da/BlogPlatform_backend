@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserResponse, UserReturn } from 'src/common/models/user';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { IUserService } from './user.interface';
@@ -22,5 +22,12 @@ export class UserService implements IUserService {
             message: '',
             data: user
         };
+    }
+    async getAllUser(): Promise<UserResponse[]>{
+        const users = await this.prisma.user.findMany();
+        if(!users){
+            throw new BadRequestException('Not fond any user');
+        }
+        return users;
     }
 }

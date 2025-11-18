@@ -13,6 +13,7 @@ import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { LikeModule } from './like/like.module';
+import { WebSocketModule } from './web-socket/web-socket.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { LikeModule } from './like/like.module';
     AuthModule,
     UserModule,
     LikeModule,
+    WebSocketModule,
   ],
   controllers: [AppController],
   providers: [AppService],

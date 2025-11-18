@@ -53,18 +53,6 @@ type BlogResponse {
   blogs: [BlogReturn!]
 }
 
-type TagReponse {
-  success: Boolean!
-  message: String
-  tags: [TagReturn!]
-}
-
-type CommentResponse {
-  success: Boolean!
-  message: String
-  comments: [CommentReturn!]
-}
-
 type AuthResponse {
   success: Boolean!
   message: String
@@ -75,6 +63,18 @@ type AuthResponse {
 type GenericResponse {
   success: Boolean!
   message: String
+}
+
+type TagReponse {
+  success: Boolean!
+  message: String
+  tags: [TagReturn!]
+}
+
+type CommentResponse {
+  success: Boolean!
+  message: String
+  comments: [CommentReturn!]
 }
 
 type LikeReturn {
@@ -96,36 +96,70 @@ type CreateResponse {
   message: String
 }
 
+type ConversationParticipant {
+  id: String!
+  conversationId: String!
+  userId: String!
+  user: UserResponse
+  joinedAt: DateTime!
+}
+
+type Message {
+  id: String!
+  conversationId: String!
+  senderId: String!
+  content: String!
+  read: Boolean!
+  sender: UserResponse
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Conversation {
+  id: String!
+  title: String
+  isGroup: Boolean!
+  participants: [ConversationParticipant!]!
+  messages: [Message!]
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type Query {
   getAllBlogs: BlogResponse!
   getBlogById(id: String!): BlogResponse!
   getTop5Like: BlogResponse!
   getTop5Recent: BlogResponse!
+  helloUser: String!
+  helloAdmin: String!
   getAllTags: TagReponse!
   getTagById(id: String!): TagReponse!
   getCommentByBlog(blogId: String!): CommentResponse!
-  helloUser: String!
-  helloAdmin: String!
   getUserById(userId: String!): UserReturn!
+  getAllUser: [UserResponse!]!
   currentUser: UserReturn!
   getLikesByBlog(blogId: String!, skip: Int, take: Int): LikeResponse!
+  getMessages(conversationId: String!, take: Float): [Message!]!
+  getMyConversations: [Conversation!]!
 }
 
 type Mutation {
   createBlog(data: CreateBlog!): BlogResponse!
   updateBlog(blogId: String!, data: UpdateBlog!): BlogResponse!
   deleteBlog(id: String!): BlogResponse!
-  createTag(data: CreateTag!): TagReponse!
-  updateTag(id: String!, data: UpdateTag!): TagReponse!
-  deleteTag(id: String!): TagReponse!
-  createComment(data: CreateComment!): CommentResponse!
   register(data: RegisterDto!): GenericResponse!
   login(data: LoginDto!): AuthResponse!
   refresh: GenericResponse!
   logout: GenericResponse!
   googleLogin(idToken: String!): AuthResponse!
+  createTag(data: CreateTag!): TagReponse!
+  updateTag(id: String!, data: UpdateTag!): TagReponse!
+  deleteTag(id: String!): TagReponse!
+  createComment(data: CreateComment!): CommentResponse!
   createLike(blogId: String!): CreateResponse!
   unLike(blogId: String!): CreateResponse!
+  createSocketToken: String!
+  createConversation(userIds: [String!]!, title: String): Conversation!
 }
 
 input CreateBlog {
@@ -141,19 +175,6 @@ input UpdateBlog {
   tagId: String!
 }
 
-input CreateTag {
-  name: String!
-}
-
-input UpdateTag {
-  name: String!
-}
-
-input CreateComment {
-  content: String!
-  blogId: String!
-}
-
 input RegisterDto {
   username: String!
   email: String!
@@ -166,4 +187,17 @@ input RegisterDto {
 input LoginDto {
   email: String!
   password: String!
+}
+
+input CreateTag {
+  name: String!
+}
+
+input UpdateTag {
+  name: String!
+}
+
+input CreateComment {
+  content: String!
+  blogId: String!
 }
