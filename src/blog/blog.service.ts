@@ -78,6 +78,45 @@ export class BlogService implements IBlogService {
         }
     }
 
+    async getBlogByUserId(userId: string): Promise<BlogResponse> {
+        try {
+            const blog = await this.prisma.blog.findMany({
+                where: { userId },
+                include: {
+                    user: true,
+                    tags: true,
+                    comments: {
+                        include: {
+                            user: true
+                        }
+                    }
+                },
+                orderBy: [
+                    {createdAt: 'desc'}
+                ]
+            });
+            if (!blog) {
+                return {
+                    success: false,
+                    message: 'Blog not found',
+                    blogs: []
+                }
+            }
+            return {
+                success: true,
+                message: 'Blog retrieved successfully',
+                blogs: blog as BlogReturn[]
+            }
+        }
+        catch (error) {
+            return {
+                success: false,
+                message: 'Error retrieving blog',
+                blogs: []
+            }
+        }
+    }
+
     async createBlog(data: CreateBlog): Promise<BlogResponse> {
         try {
             if (!data.userId || !data.tagId) {
@@ -119,12 +158,26 @@ export class BlogService implements IBlogService {
             }
         }
     }
-    async updateBlog(blogId: string, data: UpdateBlog): Promise<BlogResponse> {
+    async updateBlog(user: any, blogId: string, data: UpdateBlog): Promise<BlogResponse> {
         try {
             if (!data.tagId) {
                 return {
                     success: false,
                     message: 'UserId and TagId are required',
+                    blogs: []
+                }
+            }
+            const blogExist = await this.prisma.blog.findUnique({
+                where: {id: blogId},
+                include: {
+                    user: true
+                }
+            });
+            const currentUserId = user?.sub || user?.id;
+            if(blogExist?.userId != currentUserId){
+                return {
+                    success: false,
+                    message: "User don't have permission",
                     blogs: []
                 }
             }

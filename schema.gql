@@ -128,6 +128,7 @@ type Conversation {
 type Query {
   getAllBlogs: BlogResponse!
   getBlogById(id: String!): BlogResponse!
+  getBlogByUserId(userId: String!): BlogResponse!
   getTop5Like: BlogResponse!
   getTop5Recent: BlogResponse!
   helloUser: String!

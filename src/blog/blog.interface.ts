@@ -4,9 +4,10 @@ export interface IBlogService {
     getAllBlogs(): Promise<BlogResponse>
     getBlogById(id: string): Promise<BlogResponse>
     createBlog(data: CreateBlog): Promise<BlogResponse>
-    updateBlog(blogId: string, data: UpdateBlog): Promise<BlogResponse>
+    updateBlog(ctx: any, blogId: string, data: UpdateBlog): Promise<BlogResponse>
     deleteBlog(id: string): Promise<BlogResponse>
     getTop5Like(): Promise<BlogResponse>
     getTop5Recent(): Promise<BlogResponse>
+    getBlogByUserId(userId: string): Promise<BlogResponse>
 }
 export const BLOG_TOKEN = 'IBlogService';
