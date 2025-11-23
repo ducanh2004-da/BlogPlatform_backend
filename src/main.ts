@@ -13,7 +13,8 @@ async function bootstrap() {
     origin: [
       'http://localhost:5173',
       'http://localhost:3000',
-      'http://localhost:4173',
+      'https://blog-frontend-ebon-theta.vercel.app',
+      'https://blogplatform-backend-2ikg.onrender.com',
     ],
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
