@@ -24,6 +24,7 @@ import { ConfigService } from '@nestjs/config';
       'http://localhost:5173',
       'http://localhost:3000', 
       'http://localhost:4173',
+      'https://blogplatform-backend-2ikg.onrender.com'
     ],
     credentials: true 
   },
